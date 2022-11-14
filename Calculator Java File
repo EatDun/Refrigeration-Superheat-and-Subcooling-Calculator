@@ -62,26 +62,24 @@ class main {
         	System.out.println("Enter Suction Line Pressure\nEnter Suction Line Temperature\nEnter Liquid Line Pressure\nEnter Liquid Line Temperature\n");
 
             	//Assigning variables to user input
-        	double suctionLinePress = myObj.nextDouble();
-        	double suctionLineTemp = myObj.nextDouble();
         	double liquidLinePress = myObj.nextDouble();
         	double liquidLineTemp = myObj.nextDouble();
+        	double vaporLinePress = myObj.nextDouble();
+        	double vaporLineTemp = myObj.nextDouble();
     
                	//Adjusting inputs
-        	double suctionLinePressAdjPSIA = psiaAdj(suctionLinePress);
         	double liquidLinePressAdjPSIA = psiaAdj(liquidLinePress);
+        	double vaporLinePressAdjPSIA = psiaAdj(vaporLinePress);
        	 
             	//Math variables
         	double satRLo = 418;
         	double satRHi = 665;
-        	double nsatRLo = satRLo;
-        	double nsatRHi = satRHi;
-        	double suctionSatR = bisection(satRLo, satRHi, suctionLinePressAdjPSIA);
-        	double suctionSatF = suctionSatR - 459.67;
         	double liquidSatR = bisection(satRLo, satRHi, liquidLinePressAdjPSIA);
         	double liquidSatF = liquidSatR - 459.67;
-        	double subCooling = suctionLineTemp - suctionSatF;
-        	double superHeat = liquidSatF - liquidLineTemp;
+        	double vaporSatR = bisection(satRLo, satRHi, vaporLinePressAdjPSIA);
+        	double vaporSatF = vaporSatR - 459.67;
+        	double subCooling = liquidSatF - liquidLineTemp;
+        	double superHeat = vaporSatF - vaporLineTemp;
         	
         	    //Giving results
         	if(subCooling < 0) {
