@@ -1,0 +1,104 @@
+import java.util.Scanner;
+import java.lang.Math;
+
+class main {
+    
+    	//Adjusts values to PSIA
+	public static double psiaAdj(double num) {
+    	double add = num + 14.696;
+    	return add;
+	}
+   	 
+    	//Equation to solve saturation pressure from saturation temperature
+	public static double ptEquationS(double num) {
+    	double pt = Math.pow(10, 29.35754453 - 3845.193152 / num - 7.86103122 * Math.log10(num)  +0.002190939044 * num + (305.8268131 * (686.1 - num)) / (686.1 * num) * Math.log10(686.1 - num));
+    	return pt;
+	}
+   	 
+    	//Returns string/boolean for midpoint approximation
+	public static String comparePoints(double num1, double num2) {
+    	if (num1 < num2) {
+        	return "Over";
+    	}
+    	else {
+        	return "Under";
+    	}
+	}
+    
+    	//Returns the midpoint between two values
+	public static double midFinder(double num1, double num2) {
+    	double mid = (num1 + num2) / 2;
+    	return mid;
+	}
+    
+    	//Returns the percantage differance of two variables
+	public static double errorFind(double num1, double num2) {
+    	return Math.abs((num1 - num2) / num2) * 100;
+	}
+    
+    	//Perfoms bisection
+	public static double bisection(double numL, double numR, double numSolve) {
+    	while(true) {
+        	if(errorFind(ptEquationS(midFinder(numL, numR)), numSolve) < .0000000001) {
+            	return numR;
+        	}
+        	else {
+            	if(comparePoints(ptEquationS(midFinder(numL, numR)), numSolve) == "Over") {
+                	numL = midFinder(numL, numR);
+            	}
+            	else if(comparePoints(ptEquationS(midFinder(numL, numR)), numSolve) == "Under") {
+                	numR = midFinder(numL, numR);
+            	}
+        	}
+    	}
+	}
+   	 
+    	public static void main(String[] args) {
+    
+            	//Creating a scanner for user input
+        	Scanner myObj = new Scanner(System.in);
+    
+            	//Asking for user input
+        	System.out.println("Enter Suction Line Pressure\nEnter Suction Line Temperature\nEnter Liquid Line Pressure\nEnter Liquid Line Temperature\n");
+
+            	//Assigning variables to user input
+        	double suctionLinePress = myObj.nextDouble();
+        	double suctionLineTemp = myObj.nextDouble();
+        	double liquidLinePress = myObj.nextDouble();
+        	double liquidLineTemp = myObj.nextDouble();
+    
+               	//Adjusting inputs
+        	double suctionLinePressAdjPSIA = psiaAdj(suctionLinePress);
+        	double liquidLinePressAdjPSIA = psiaAdj(liquidLinePress);
+       	 
+            	//Math variables
+        	double satRLo = 418;
+        	double satRHi = 665;
+        	double nsatRLo = satRLo;
+        	double nsatRHi = satRHi;
+        	double suctionSatR = bisection(satRLo, satRHi, suctionLinePressAdjPSIA);
+        	double suctionSatF = suctionSatR - 459.67;
+        	double liquidSatR = bisection(satRLo, satRHi, liquidLinePressAdjPSIA);
+        	double liquidSatF = liquidSatR - 459.67;
+        	double subCooling = suctionLineTemp - suctionSatF;
+        	double superHeat = liquidSatF - liquidLineTemp;
+        	
+        	    //Giving results
+        	if(subCooling < 0) {
+        	    System.out.println("Subcooling cannot be below zero");
+        	}
+        	else if(superHeat < 0) {
+        	    System.out.println("Superheat cannot be below zero");
+        	}
+        	else {
+        	System.out.println("\nSubcooling is " + subCooling + "\nSuperheat is " + superHeat);
+        	}
+	}
+}
+//Created with help from,
+//Andrew Pansulla and the Chemours Company
+//JJ Martin of the University of Michigan
+//Larry David of Washtenaw Community College
+//Nirmal Patel of Learn Sense
+//Brandon White
+//Josh Levine of Josh.com
