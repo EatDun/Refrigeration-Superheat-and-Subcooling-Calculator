@@ -8,6 +8,12 @@ class main {
     	double add = num + 14.696;
     	return add;
 	}
+    
+    	//Adjusts values from rankin to fahrenheit
+	public static double rankinAdj(double num) {
+    	double sub = num - 459.67;
+    	return sub;
+	}
    	 
     	//Equation to solve saturation pressure from saturation temperature
 	public static double ptEquationS(double num) {
@@ -36,11 +42,11 @@ class main {
     	return Math.abs((num1 - num2) / num2) * 100;
 	}
     
-    	//Perfoms bisection
+    	//Performs bisection
 	public static double bisection(double numL, double numR, double numSolve) {
     	while(true) {
-        	if(errorFind(ptEquationS(midFinder(numL, numR)), numSolve) < .0000000001) {
-            	return numR;
+        	if(errorFind(ptEquationS(midFinder(numL, numR)), numSolve) < .000000000001) {
+            	return midFinder(numL, numR);
         	}
         	else {
             	if(comparePoints(ptEquationS(midFinder(numL, numR)), numSolve) == "Over") {
@@ -53,44 +59,50 @@ class main {
     	}
 	}
    	 
-    	public static void main(String[] args) {
+	public static void main(String[] args) {
+        	//Creating a scanner for user input
+    	Scanner myObj = new Scanner(System.in);
     
-            	//Creating a scanner for user input
-        	Scanner myObj = new Scanner(System.in);
-    
-            	//Asking for user input
-        	System.out.println("Enter Suction Line Pressure\nEnter Suction Line Temperature\nEnter Liquid Line Pressure\nEnter Liquid Line Temperature\n");
+        	//Asking for user input
+    	System.out.println("\nEnter Liquid Line Pressure\nEnter Liquid Line Temperature\nEnter Vapor Line Pressure\nEnter Vapor Line Temperature\n");
 
-            	//Assigning variables to user input
-        	double liquidLinePress = myObj.nextDouble();
-        	double liquidLineTemp = myObj.nextDouble();
-        	double vaporLinePress = myObj.nextDouble();
-        	double vaporLineTemp = myObj.nextDouble();
+        	//Assigning variables to user input
+    	double liquidLinePress = myObj.nextDouble();
+    	double liquidLineTemp = myObj.nextDouble();
+    	double vaporLinePress = myObj.nextDouble();
+    	double vaporLineTemp = myObj.nextDouble();
+   	 
+    	if(liquidLinePress > 707.21 || vaporLinePress > 707.21) {
+        	System.out.println("Guage reading is above critical pressure");
+    	}
+    	else if(liquidLinePress < 0 || vaporLinePress < 0) {
+        	System.out.println("Charged system pressure cannot be below zero PSIG");
+    	}
     
-               	//Adjusting inputs
-        	double liquidLinePressAdjPSIA = psiaAdj(liquidLinePress);
-        	double vaporLinePressAdjPSIA = psiaAdj(vaporLinePress);
+           	//Adjusting inputs
+    	double liquidLinePressAdjPSIA = psiaAdj(liquidLinePress);
+    	double vaporLinePressAdjPSIA = psiaAdj(vaporLinePress);
+   	 
+        	//Math variables
+    	double satRLo = 418.3339585682146;
+    	double satRHi = 664.5086257144121;
+    	double liquidSatR = bisection(satRLo, satRHi, liquidLinePressAdjPSIA);
+    	double liquidSatF = rankinAdj(liquidSatR);
+    	double vaporSatR = bisection(satRLo, satRHi, vaporLinePressAdjPSIA);
+    	double vaporSatF = rankinAdj(vaporSatR);
+    	double subCooling = liquidSatF - liquidLineTemp;
+    	double superHeat = vaporLineTemp - vaporSatF;
        	 
-            	//Math variables
-        	double satRLo = 418;
-        	double satRHi = 665;
-        	double liquidSatR = bisection(satRLo, satRHi, liquidLinePressAdjPSIA);
-        	double liquidSatF = liquidSatR - 459.67;
-        	double vaporSatR = bisection(satRLo, satRHi, vaporLinePressAdjPSIA);
-        	double vaporSatF = vaporSatR - 459.67;
-        	double subCooling = liquidSatF - liquidLineTemp;
-        	double superHeat = vaporSatF - vaporLineTemp;
-        	
-        	    //Giving results
-        	if(subCooling < 0) {
-        	    System.out.println("Subcooling cannot be below zero");
-        	}
-        	else if(superHeat < 0) {
-        	    System.out.println("Superheat cannot be below zero");
-        	}
-        	else {
-        	System.out.println("\nSubcooling is " + subCooling + "\nSuperheat is " + superHeat);
-        	}
+        	//Giving results
+    	if(subCooling < 0) {
+        	System.out.println("Subcooling cannot be below zero");
+    	}
+    	else if(superHeat < 0) {
+        	System.out.println("Superheat cannot be below zero");
+    	}
+    	else {
+    	System.out.println("\nSubcooling is " + subCooling + "\nSuperheat is " + superHeat);
+    	}
 	}
 }
 //Created with help from,
