@@ -37,7 +37,7 @@ class main {
     	return mid;
 	}
     
-    	//Returns the percantage differance of two variables
+    	//Returns the percentage difference of two variables
 	public static double errorFind(double num1, double num2) {
     	return Math.abs((num1 - num2) / num2) * 100;
 	}
@@ -65,6 +65,10 @@ class main {
 	}
    	 
 	public static void main(String[] args) {
+	    
+	        //Array that stores constant values
+        double[] maxPressure = {707.21, 699.804};
+	    
         	//Creating a scanner for user input
     	Scanner myObj = new Scanner(System.in);
     
@@ -77,8 +81,8 @@ class main {
     	double vaporLinePress = myObj.nextDouble();
     	double vaporLineTemp = myObj.nextDouble();
    	 
-    	if(liquidLinePress > 707.21 || vaporLinePress > 707.21) {
-        	System.out.println("Guage reading is above critical pressure");
+    	if(liquidLinePress > maxPressure[0] || vaporLinePress > maxPressure[0]) {
+        	System.out.println("Gauge reading is above critical pressure");
     	}
     	else if(liquidLinePress < 0 || vaporLinePress < 0) {
         	System.out.println("Charged system pressure cannot be below zero PSIG");
@@ -89,8 +93,10 @@ class main {
     	double vaporLinePressAdjPSIA = psiaAdj(vaporLinePress);
    	 
         	//Math variables
-    	double satRLo = 418.3339585682146;
-    	double satRHi = 664.5086257144121;
+        double[] RLos = {418.3339585682146, 69};
+        double[] RHis = {664.5086257144121, 420};
+    	double satRLo = RLos[0];
+    	double satRHi = RHis[0];
     	double liquidSatR = bisection(satRLo, satRHi, liquidLinePressAdjPSIA);
     	double liquidSatF = rankinAdj(liquidSatR);
     	double vaporSatR = bisection(satRLo, satRHi, vaporLinePressAdjPSIA);
