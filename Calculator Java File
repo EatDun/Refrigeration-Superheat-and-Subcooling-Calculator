@@ -41,6 +41,11 @@ class main {
 	public static double errorFind(double num1, double num2) {
     	return Math.abs((num1 - num2) / num2) * 100;
 	}
+	
+	    //Subtracts for final value
+	public static double finalSub(double num1, double num2) {
+	    return num1 - num2;
+	}
     
     	//Performs bisection
 	public static double bisection(double numL, double numR, double numSolve) {
@@ -90,8 +95,8 @@ class main {
     	double liquidSatF = rankinAdj(liquidSatR);
     	double vaporSatR = bisection(satRLo, satRHi, vaporLinePressAdjPSIA);
     	double vaporSatF = rankinAdj(vaporSatR);
-    	double subCooling = liquidSatF - liquidLineTemp;
-    	double superHeat = vaporLineTemp - vaporSatF;
+    	double subCooling = finalSub(liquidSatF, liquidLineTemp);
+    	double superHeat = finalSub(vaporLineTemp, vaporSatF);
        	 
         	//Giving results
     	if(subCooling < 0) {
