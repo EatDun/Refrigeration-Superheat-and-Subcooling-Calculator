@@ -16,9 +16,16 @@ class main {
 	}
    	 
     	//Equation to solve saturation pressure from saturation temperature
-	public static double ptEquationS(double num) {
-    	double pt = Math.pow(10, 29.35754453 - 3845.193152 / num - 7.86103122 * Math.log10(num)  +0.002190939044 * num + (305.8268131 * (686.1 - num)) / (686.1 * num) * Math.log10(686.1 - num));
-    	return pt;
+	public static double ptEquation(double num, int id, double press, double temp) {
+    	if(id == 1){
+        	double pt = Math.pow(10, 29.35754453 - 3845.193152 / num - 7.86103122 * Math.log10(num)  +0.002190939044 * num + (305.8268131 * (686.1 - num)) / (686.1 * num) * Math.log10(686.1 - num));
+        	return pt;
+    	}
+    	else {
+        	double X = (1 - (num / temp)) - 0.2086902;
+        	double pt = Math.pow(2.71828, (1 / (num / temp)) * (-1.4376 + (-6.8715 * X) + (-0.53623 * Math.pow(X, 2)) + (-3.82642 * Math.pow(X, 3)) + (-4.06875 * Math.pow(X, 4)) + (-1.2333 * Math.pow(X, 5))));
+        	return pt * press;
+    	}
 	}
    	 
     	//Returns string/boolean for midpoint approximation
@@ -41,23 +48,23 @@ class main {
 	public static double errorFind(double num1, double num2) {
     	return Math.abs((num1 - num2) / num2) * 100;
 	}
-	
-	    //Subtracts for final value
+    
+    	//Subtracts for final value
 	public static double finalSub(double num1, double num2) {
-	    return num1 - num2;
+    	return num1 - num2;
 	}
     
     	//Performs bisection
-	public static double bisection(double numL, double numR, double numSolve) {
+	public static double bisection(double numL, double numR, double numSolve, int refID, double press, double temp) {
     	while(true) {
-        	if(errorFind(ptEquationS(midFinder(numL, numR)), numSolve) < .000000000001) {
+        	if(errorFind(ptEquation(midFinder(numL, numR), refID, press, temp), numSolve) < .000000000001) {
             	return midFinder(numL, numR);
         	}
         	else {
-            	if(comparePoints(ptEquationS(midFinder(numL, numR)), numSolve) == "Over") {
+            	if(comparePoints(ptEquation(midFinder(numL, numR), refID, press, temp), numSolve) == "Over") {
                 	numL = midFinder(numL, numR);
             	}
-            	else if(comparePoints(ptEquationS(midFinder(numL, numR)), numSolve) == "Under") {
+            	else if(comparePoints(ptEquation(midFinder(numL, numR), refID, press, temp), numSolve) == "Under") {
                 	numR = midFinder(numL, numR);
             	}
         	}
@@ -65,27 +72,45 @@ class main {
 	}
    	 
 	public static void main(String[] args) {
-	    
-	        //Array that stores constant values
-        double[] maxPressure = {707.21, 699.804};
-	    
+   	 
         	//Creating a scanner for user input
-    	Scanner myObj = new Scanner(System.in);
+    	Scanner myObj1 = new Scanner(System.in);
+   	 
+        	//Asking for refrigerant type
+   	System.out.println("Enter refrigerant type\nType 1 for R-22\nType 2 for R-410A\n");
+   	 
+        	//Assigning variables to user input
+    	int refType = myObj1.nextInt();
+   	 
+        	//Array that stores constant values
+    	double[] maxPress = {0, 707.21, 714.5};
+    	double[] maxTemp = {0, 204.81, 161.83};
+   	 
+        	//Creating a scanner for user input
+    	Scanner myObj2 = new Scanner(System.in);
     
         	//Asking for user input
+    	if(refType < 1 || refType > 2) {
+        	System.out.println("Refrigerant input not found");
+    	}
+    	else {
     	System.out.println("\nEnter Liquid Line Pressure\nEnter Liquid Line Temperature\nEnter Vapor Line Pressure\nEnter Vapor Line Temperature\n");
+    	}
 
         	//Assigning variables to user input
-    	double liquidLinePress = myObj.nextDouble();
-    	double liquidLineTemp = myObj.nextDouble();
-    	double vaporLinePress = myObj.nextDouble();
-    	double vaporLineTemp = myObj.nextDouble();
+    	double liquidLinePress = myObj2.nextDouble();
+    	double liquidLineTemp = myObj2.nextDouble();
+    	double vaporLinePress = myObj2.nextDouble();
+    	double vaporLineTemp = myObj2.nextDouble();
    	 
-    	if(liquidLinePress > maxPressure[0] || vaporLinePress > maxPressure[0]) {
+    	if(liquidLinePress > maxPress[refType] || vaporLinePress > maxPress[refType]) {
         	System.out.println("Gauge reading is above critical pressure");
     	}
     	else if(liquidLinePress < 0 || vaporLinePress < 0) {
         	System.out.println("Charged system pressure cannot be below zero PSIG");
+    	}
+    	else if(liquidLineTemp > maxTemp[refType] || vaporLineTemp > maxTemp[refType]) {
+        	System.out.println("Thermometer reading is above critical temperature");
     	}
     
            	//Adjusting inputs
@@ -93,27 +118,27 @@ class main {
     	double vaporLinePressAdjPSIA = psiaAdj(vaporLinePress);
    	 
         	//Math variables
-        double[] RLos = {418.3339585682146, 69};
-        double[] RHis = {664.5086257144121, 420};
-    	double satRLo = RLos[0];
-    	double satRHi = RHis[0];
-    	double liquidSatR = bisection(satRLo, satRHi, liquidLinePressAdjPSIA);
+    	double[] RLos = {0, 418.3339585682146, 408};
+    	double[] RHis = {0, 664.5086257144121, 621.5};
+    	double satRLo = RLos[refType];
+    	double satRHi = RHis[refType];
+    	double liquidSatR = bisection(satRLo, satRHi, liquidLinePressAdjPSIA, refType, maxPress[refType], satRHi);
     	double liquidSatF = rankinAdj(liquidSatR);
-    	double vaporSatR = bisection(satRLo, satRHi, vaporLinePressAdjPSIA);
+    	double vaporSatR = bisection(satRLo, satRHi, vaporLinePressAdjPSIA, refType, maxPress[refType], satRHi);
     	double vaporSatF = rankinAdj(vaporSatR);
     	double subCooling = finalSub(liquidSatF, liquidLineTemp);
     	double superHeat = finalSub(vaporLineTemp, vaporSatF);
        	 
         	//Giving results
-    	if(subCooling < 0) {
-        	System.out.println("Subcooling cannot be below zero");
-    	}
-    	else if(superHeat < 0) {
-        	System.out.println("Superheat cannot be below zero");
-    	}
-    	else {
+    	//if(subCooling < 0) {
+        	//System.out.println("Subcooling cannot be below zero");
+    	//}
+    	//else if(superHeat < 0) {
+        //	System.out.println("Superheat cannot be below zero");
+    	//}
+    	//else {
     	System.out.println("\nSubcooling is " + subCooling + "\nSuperheat is " + superHeat);
-    	}
+    	//}
 	}
 }
 //Created with help from,
@@ -122,5 +147,6 @@ class main {
 //Larry David of Washtenaw Community College
 //Nirmal Patel of Learn Sense
 //Brandon White
+//Strider Toll
 //Josh Levine of Josh.com
-
+//ChatGPT of OpenAI
