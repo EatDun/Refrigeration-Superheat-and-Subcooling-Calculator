@@ -18,13 +18,58 @@ class main {
     	//Equation to solve saturation pressure from saturation temperature
 	public static double ptEquation(double num, int id, double press, double temp) {
     	if(id == 1){
-        	double pt = Math.pow(10, 29.35754453 - 3845.193152 / num - 7.86103122 * Math.log10(num)  +0.002190939044 * num + (305.8268131 * (686.1 - num)) / (686.1 * num) * Math.log10(686.1 - num));
+    	    double A = 29.35754453;
+    	    double B = 3845.193152;
+    	    double C = 7.86103122;
+    	    double D = 0.002190939044;
+    	    double E = 305.8268131;
+    	    double F = 686.1;
+        	double pt = Math.pow(10, A - B / num - C * Math.log10(num)  + D * num + (E * (F - num)) / (F * num) * Math.log10(F - num));
         	return pt;
     	}
-    	else {
+    	else if (id == 2) {
         	double X = (1 - (num / temp)) - 0.2086902;
-        	double pt = Math.pow(2.71828, (1 / (num / temp)) * (-1.4376 + (-6.8715 * X) + (-0.53623 * Math.pow(X, 2)) + (-3.82642 * Math.pow(X, 3)) + (-4.06875 * Math.pow(X, 4)) + (-1.2333 * Math.pow(X, 5))));
+        	double e = 2.71828;
+        	double A = -1.4376;
+        	double B = -6.8715;
+        	double C = -0.53623;
+        	double D = -3.82642;
+        	double E = -4.06875;
+        	double F = -1.2333;
+        	double pt = Math.pow(e, (1 / (num / temp)) * (A + (B * X) + (C * Math.pow(X, 2)) + (D * Math.pow(X, 3)) + (E * Math.pow(X, 4)) + (F * Math.pow(X, 5))));
         	return pt * press;
+    	}
+    	else if (id == 3) {
+    	    double A = 43.25629;
+            double B = -4293.056 ;
+            double C = -13.06883;
+            double D = .004231114;
+            double E = .2342564;
+            double F = 677;
+            double pt = Math.pow(10, A + B / num + C * Math.log10(num) + D * num + E * ((F - num) / num) * Math.log10(F - num));
+            return pt;
+    	}
+    	else if (id == 4) {
+    	    double e = 2.71828;
+    	    double A = 57.5859;
+    	    double B = -6522.92;
+    	    double C = -6.58061;
+    	    double D = .00000394176;
+    	    double pt = Math.pow(e, A + (B / num) + C * Math.log(num) + D * (num * num));
+    	    return pt;
+    	}
+    	else if (id == 5) {
+    	    double e = 2.71828;
+    	    double A =  43.3622;
+    	    double B = -6020.28;
+    	    double C = -4.39387;
+    	    double D = 0.00000212036;
+    	    double pt = Math.pow(e, A + (B / num) + C * Math.log(num) + D * (num * num));
+    	    return pt;
+    	}
+    	else {
+    	    System.out.println("RefID not found");
+    	    return 69;
     	}
 	}
    	 
@@ -77,20 +122,20 @@ class main {
     	Scanner myObj1 = new Scanner(System.in);
    	 
         	//Asking for refrigerant type
-   	System.out.println("Enter refrigerant type\nType 1 for R-22\nType 2 for R-410A\n");
+   	System.out.println("Enter refrigerant type\nType 1 for R-22\nType 2 for R-410A\nType 3 for R-134a\nType 4 for R-404A\nType 5 for R-407C\n");
    	 
         	//Assigning variables to user input
     	int refType = myObj1.nextInt();
    	 
         	//Array that stores constant values
-    	double[] maxPress = {0, 707.21, 714.5};
-    	double[] maxTemp = {0, 204.81, 161.83};
+    	double[] maxPress = {0, 707.21, 714.5, 588.9, 541.2, 669.95};
+    	double[] maxTemp = {0, 204.81, 161.83, 213.9, 161.73, 188.13};
    	 
         	//Creating a scanner for user input
     	Scanner myObj2 = new Scanner(System.in);
     
         	//Asking for user input
-    	if(refType < 1 || refType > 2) {
+    	if(refType < 1 || refType > 5) {
         	System.out.println("Refrigerant input not found");
     	}
     	else {
@@ -118,8 +163,8 @@ class main {
     	double vaporLinePressAdjPSIA = psiaAdj(vaporLinePress);
    	 
         	//Math variables
-    	double[] RLos = {0, 418.3339585682146, 408};
-    	double[] RHis = {0, 664.5086257144121, 621.5};
+    	double[] RLos = {0, 418.3339585682146, 408, 444.7, 407.7, 416};
+    	double[] RHis = {0, 664.5086257144121, 621.5, 673.6, 621.4, 647.8};
     	double satRLo = RLos[refType];
     	double satRHi = RHis[refType];
     	double liquidSatR = bisection(satRLo, satRHi, liquidLinePressAdjPSIA, refType, maxPress[refType], satRHi);
@@ -130,15 +175,15 @@ class main {
     	double superHeat = finalSub(vaporLineTemp, vaporSatF);
        	 
         	//Giving results
-    	//if(subCooling < 0) {
-        	//System.out.println("Subcooling cannot be below zero");
-    	//}
-    	//else if(superHeat < 0) {
-        //	System.out.println("Superheat cannot be below zero");
-    	//}
-    	//else {
+    	if (subCooling < 0) {
+        	System.out.println("Subcooling cannot be below zero");
+        }
+    	else if(superHeat < 0) {
+        	System.out.println("Superheat cannot be below zero");
+    	}
+    	else {
     	System.out.println("\nSubcooling is " + subCooling + "\nSuperheat is " + superHeat);
-    	//}
+    	}
 	}
 }
 //Created with help from,
