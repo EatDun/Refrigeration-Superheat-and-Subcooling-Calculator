@@ -1,4 +1,4 @@
-public class RefCalc {
+public class Main {
 
     // Adjusts values to PSIA
     public static double psiaAdj(double num) {
